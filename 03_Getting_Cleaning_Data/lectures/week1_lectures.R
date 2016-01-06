@@ -33,7 +33,9 @@ head(cameraData)
 ### reading Excel files
 
 fileUrl <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xlsx?accessType=DOWNLOAD"
-download.file(fileUrl, destfile = "./data/cameras.xlsx")
+
+    ### set mode in order to access later ###
+download.file(fileUrl, destfile = "./data/cameras.xlsx", mode = 'wb')
 dateDownloaded <- date()
 dateDownloaded
 # [1] "Tue Jan 05 15:50:43 2016"
@@ -41,6 +43,9 @@ dateDownloaded
 list.files("./data")
 # [1] "cameras.csv"  "cameras.xlsx"
 
+### upgrade to 3.2.3
+### make sure R platform matches Java platform (32 v 64)
+### add jvm.dll to Environment Variables [Program Files v Program Files (x86)]
 library(xlsx)
 cameraData <- read.xlsx("./data/cameras.xlsx", sheetIndex=1, header=TRUE)
 head(cameraData)
