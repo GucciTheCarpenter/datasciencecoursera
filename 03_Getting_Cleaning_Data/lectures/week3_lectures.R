@@ -82,22 +82,115 @@ Y
 
         ### Summarizing Data
 
+restData <- read.csv("https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD")
+head(restData, 3)
+tail(restData, 3)
+
+summary(restData)
+str(restData)
+
+quantile(restData$councilDistrict, na.rm = T)
+# 0%  25%  50%  75% 100% 
+# 1    2    9   11   14 
+
+quantile(restData$councilDistrict, probs = c(.5,.75,.9))
+# 50% 75% 90% 
+# 9  11  12 
+
+# add NA column if data missing
+table(restData$zipCode,useNA = "ifany")
+
+table(restData$councilDistrict, restData$zipCode)
+# -21226 21201 21202 21205 21206 21207 21208 21209 21210 21211
+# 1       0     0    37     0     0     0     0     0     0     0
+# 2       0     0     0     3    27     0     0     0     0     0
+
+sum(is.na(restData$councilDistrict))
+# [1] 0
+
+any(is.na(restData$councilDistrict))
+# [1] FALSE
+
+all(restData$zipCode > 0)
+# [1] FALSE
+
+colSums(is.na(restData))
+# name         zipCode    neighborhood councilDistrict policeDistrict      Location.1 
+# 0               0               0               0               0               0 
+
+all(colSums(is.na(restData))==0)
+# [1] TRUE
+
+table(restData$zipCode %in% c("21212"))
+# FALSE  TRUE 
+# 1299    28 
+
+table(restData$zipCode %in% c("21212", "21213"))
+# FALSE  TRUE 
+# 1268    59
+
+restData[restData$zipCode %in% c("21212", "21213"),]
+# name zipCode
+# 29                      BAY ATLANTIC CLUB   21212
+# 39                            BERMUDA BAR   21213
+
+# cross tabs
+data("UCBAdmissions")
+DF = as.data.frame(UCBAdmissions)
+summary(DF)
+# Admit         Gender      Dept       Freq      
+# Admitted:12   Male  :12   A:4   Min.   :  8.0  
+# Rejected:12   Female:12   B:4   1st Qu.: 80.0  
+#                           C:4   Median :170.0  
+#                           D:4   Mean   :188.6  
+#                           E:4   3rd Qu.:302.5  
+#                           F:4   Max.   :512.0 
+                          
+xt <- xtabs(Freq ~ Gender + Admit,data=DF)
+xt
+#         Admit
+# Gender   Admitted Rejected
+# Male       1198     1493
+# Female      557     1278
+
+# flat tables
+dim(warpbreaks)
+warpbreaks$replicate <- rep(1:9, len = 54)
+xt = xtabs(breaks ~.,data=warpbreaks)
+xt
+
+ftable(xt)
+#         replicate  1  2  3  4  5  6  7  8  9
+#        wool tension                                     
+# A    L            26 30 54 25 70 52 51 26 67
+# M                 18 21 29 17 12 18 35 30 36
+# H                 36 21 24 18 10 43 28 15 26
+# B    L            27 14 29 19 29 31 41 20 44
+# M                 42 26 19 16 39 28 21 39 29
+# H                 20 21 24 17 13 15 15 16 28
+
+fakeData = rnorm(1e5)
+object.size(fakeData)
+# 800040 bytes
+
+print(object.size(fakeData),units='Mb')
+# 0.8 Mb
 
 
-### Creating New Variables
+        ### Creating New Variables
 
 
 
-### Reshaping Data
+        ### Reshaping Data
 
 
 
-### Managing Data Frames with dplyr - Introduction
+        ### Managing Data Frames with dplyr - Introduction
 
 
 
-### Managing Data Frames with dplyr - Basic Tools
+        ### Managing Data Frames with dplyr - Basic Tools
 
 
 
-### Merging Data
+        ### Merging Data
