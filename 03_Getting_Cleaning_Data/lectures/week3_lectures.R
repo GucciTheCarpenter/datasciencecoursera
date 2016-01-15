@@ -179,6 +179,99 @@ print(object.size(fakeData),units='Mb')
 
         ### Creating New Variables
 
+restData <- read.csv("https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD")
+
+# creating sequences
+s1 <- seq(1,10,by=2); s1
+# [1] 1 3 5 7 9
+
+s2 <- seq(1,10,length=3); s2
+# [1]  1.0  5.5 10.0
+
+x <- c(1,3,8,25,100); seq(along=x)
+# [1] 1 2 3 4 5
+
+restData$nearMe = restData$neighborhood %in% c("Rolland Park", "Homeland")
+table(restData$nearMe)
+# FALSE  TRUE 
+# 1323     4 
+
+restData$zipWrong = ifelse(restData$zipCode < 0, TRUE, FALSE)
+table(restData$zipWrong, restData$zipCode < 0)
+#       FALSE TRUE
+# FALSE  1326    0
+# TRUE      0    1
+
+# create categorical variables
+restData$zipGroups = cut(restData$zipCode,breaks=quantile(restData$zipCode))
+table(restData$zipGroups)
+# (-2.123e+04,2.12e+04]  (2.12e+04,2.122e+04] 
+# 337                   375 
+
+table(restData$zipGroups, restData$zipCode)
+#                       -21226 21201 21202 21205 21206 21207
+# (-2.123e+04,2.12e+04]      0   136   201     0     0     0
+# (2.12e+04,2.122e+04]       0     0     0    27    30     4
+# (2.122e+04,2.123e+04]      0     0     0     0     0     0
+# (2.123e+04,2.129e+04]      0     0     0     0     0     0
+
+unique(restData$zipGroups)
+# [1] (2.12e+04,2.122e+04]  (2.123e+04,2.129e+04]
+# [3] (2.122e+04,2.123e+04] (-2.123e+04,2.12e+04]
+
+# easier cutting
+library(Hmisc)
+restData$zipGroups = cut2(restData$zipCode,g=4)
+table(restData$zipGroups)
+# [-21226,21205) [ 21205,21220) [ 21220,21227) [ 21227,21287] 
+#            338            375            300            314
+
+# create factor variables
+restData$zcf <- factor(restData$zipCode)
+restData$zcf[1:10]
+# [1] 21206 21231 21224 21211 21223 21218 21205 21211 21205 21231
+# 32 Levels: -21226 21201 21202 21205 21206 21207 21208 ... 21287
+
+class(restData$zcf)
+# [1] "factor"
+
+# levels of factor variables
+yesno <- sample(c('yes', 'no'), size=10, replace=T)
+yesnofac <- factor(yesno, levels=c('yes','no'))
+?relevel
+# The levels of a factor are re-ordered so that the level specified by ref 
+# is first and the others are moved down. 
+relevel(yesnofac, ref = 'yes')
+# [1] yes yes yes no  no  yes yes yes no  yes
+# Levels: yes no
+
+as.numeric(yesnofac)
+# [1] 1 1 1 2 2 1 1 1 2 1
+
+#cutting produces factor variables
+library(Hmisc)
+restData$zipGroups = cut2(restData$zipCode,g=4)
+table(restData$zipGroups)
+# [-21226,21205) [ 21205,21220) [ 21220,21227) [ 21227,21287] 
+#            338            375            300            314
+
+library(Hmisc); library(plyr)
+restData2 = mutate(restData,zipGroups=cut2(restData$zipCode,g=4))
+table(restData2$zipGroups)
+# [-21226,21205) [ 21205,21220) [ 21220,21227) [ 21227,21287] 
+#            338            375            300            314
+
+# common transforms
+abs(x)
+sqrt(x)
+ceiling(x)
+floor(x)
+round(x, digits = n)
+signif(x, digits = n)
+cos(x); sin(x)
+log(x)
+log2(x); log10(x)
+exp(x)
 
 
         ### Reshaping Data
@@ -194,3 +287,56 @@ print(object.size(fakeData),units='Mb')
 
 
         ### Merging Data
+
+reviews <- read.csv("https://dl.dropboxusercontent.com/u/7710864/data/reviews-apr29.csv")
+solutions <- read.csv("https://dl.dropboxusercontent.com/u/7710864/data/solutions-apr29.csv")
+head(reviews, 2)
+# id solution_id reviewer_id      start       stop time_left accept
+#  1           3          27 1304095698 1304095758      1754      1
+#  2           4          22 1304095188 1304095206      2306      1
+
+head(solutions, 2)
+#  id problem_id subject_id      start       stop time_left answer
+#   1        156         29 1304095119 1304095169      2343      B
+#   2        269         25 1304095119 1304095183      2329      C
+
+names(reviews); names(solutions)
+
+mergedData = merge(reviews, solutions, by.x = "solution_id", by.y = "id", all = T)
+head(mergedData)
+#  solution_id id reviewer_id    start.x     stop.x time_left.x accept problem_id
+#            1  4          26 1304095267 1304095423        2089      1        156
+#            2  6          29 1304095471 1304095513        1999      1        269
+
+intersect(names(reviews), names(solutions))
+# [1] "id"        "start"     "stop"      "time_left"
+
+mergedData2 = merge(reviews, solutions, all=T)
+head(mergedData2)
+# id      start       stop time_left solution_id reviewer_id accept problem_id
+#  1 1304095119 1304095169      2343          NA          NA     NA        156
+#  1 1304095698 1304095758      1754           3          27      1         NA
+
+dim(mergedData); dim(mergedData2)
+# [1] 205  13
+# [1] 404  10
+
+# using join in plyr
+# less features - defaults to left join, need common name
+df1 = data.frame(id=sample(1:10),x=rnorm(10))
+df2 = data.frame(id=sample(1:10),y=rnorm(10))
+?arrange
+arrange(join(df1, df2), id)
+# id           x           y
+#  1 -0.08016935  0.43503339
+#  2 -0.05308545  0.30164350
+
+# plyr join for MULTIPLE data frames
+df1 = data.frame(id=sample(1:10),x=rnorm(10))
+df2 = data.frame(id=sample(1:10),y=rnorm(10))
+df3 = data.frame(id=sample(1:10),z=rnorm(10))
+dfList = list(df1,df2,df3)
+join_all(dfList)
+# id          x          y          z
+# 10  0.4651312  0.6720878 -0.4585242
+#  3 -1.8034367  1.2231851  0.1081119

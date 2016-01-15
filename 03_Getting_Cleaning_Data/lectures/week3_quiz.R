@@ -43,25 +43,63 @@ quantile(jeffPeg, c(.3, .8))
 
 
     #Q3
-("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv")
-("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv")
+df_gdp = read.csv("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv", skip = 4)
+df_gdp = df_gdp[, c("X", "X.1", "X.3", "X.4")]
+colnames(df_gdp) <- c("country", "rank", "economy", "dollars_millions")
+df_gdp = df_gdp[1:190,]
+df_gdp$rank = as.numeric(as.character(df_gdp$rank))
+df_gdp$dollars_millions = as.numeric(gsub(",", "", as.character(df_gdp$dollars_millions)))
+
+df_edu = read.csv("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv")
 # Match the data based on the country shortcode. 
+names(df_gdp); names(df_edu)
+head(df_gdp)
+table(df_gdp$X)
+head(df_edu)
+table(df_edu$CountryCode)
+dim(df_gdp); dim(df_edu)
+
+df_merge = merge(df_gdp, df_edu, by.x = "country", by.y = "CountryCode")
 
 # How many of the IDs match? 
+dim(df_merge)
 
 # Sort the data frame in descending order by GDP rank (so United States is last). 
+sort(df_merge$rank, decreasing = TRUE)
 
 # What is the 13th country in the resulting data frame?
-
+head(df_merge[order(df_merge$rank,decreasing = T),], 13)
 
     #Q4
 # What is the average GDP ranking for the "High income: OECD" and "High income: nonOECD" group?
-
+library(dplyr)
+by_income = group_by(df_merge, Income.Group)
+summarize(by_income, mean(rank))
+# Source: local data frame [5 x 2]
+# 
+#           Income.Group mean(rank)
+#                 (fctr)      (dbl)
+# 1 High income: nonOECD   91.91304
+# 2    High income: OECD   32.96667
+# 3           Low income  133.72973
+# 4  Lower middle income  107.70370
+# 5  Upper middle income   92.13333
 
     #Q5
 # Cut the GDP ranking into 5 separate quantile groups. 
-# Make a table versus Income.Group. 
-# How many countries are Lower middle income but among the 38 nations with highest GDP?
+library(Hmisc)
+df_merge$gdpGroups = cut2(df_merge$rank,g=5)
+table(df_merge$gdpGroups)
 
+# Make a table versus Income.Group. 
+table(df_merge$gdpGroups, df_merge$Income.Group)
+
+# How many countries are Lower middle income but among the 38 nations with highest GDP?
+#             High income: nonOECD High income: OECD Low income Lower middle income Upper middle income
+# [  1, 39)  0                    4                18          0                   5                  11
+# [ 39, 77)  0                    5                10          1                  13                   9
+# [ 77,115)  0                    8                 1          9                  12                   8
+# [115,154)  0                    5                 1         16                   8                   8
+# [154,190]  0                    1                 0         11                  16                   9
 
 
