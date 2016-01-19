@@ -392,7 +392,143 @@ head(spraySums)
 
         ### Managing Data Frames with dplyr - Basic Tools
 
+library(dplyr)
+# download data:
+# https://github.com/DataScienceSpecialization/courses/tree/master/03_GettingData/dplyr
+chicago <- readRDS("chicago.rds")
+dim(chicago)
+# [1] 6940    8
 
+str(chicago)
+# 'data.frame':	6940 obs. of  8 variables:
+# $ city      : chr  "chic" "chic" "chic" "chic" ...
+# $ tmpd      : num  31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+
+names(chicago)
+# [1] "city"       "tmpd"       "dptp"       "date"      
+# [5] "pm25tmean2" "pm10tmean2" "o3tmean2"   "no2tmean2"
+
+    ### select 
+
+head(select(chicago, city:dptp))
+#   city tmpd   dptp
+# 1 chic 31.5 31.500
+# 2 chic 33.0 29.875
+
+head(select(chicago, -(city:dptp)))
+#         date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 1987-01-01         NA   34.00000 4.250000  19.98810
+# 2 1987-01-02         NA         NA 3.304348  23.19099
+
+# non-R alternate; find indexes
+i <- match("city", names(chicago))
+j <- match("dptp", names(chicago))
+head(chicago[, -(i:j)])
+#         date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 1987-01-01         NA   34.00000 4.250000  19.98810
+# 2 1987-01-02         NA         NA 3.304348  23.19099
+
+    ### filter (rows)
+
+chic.f <- filter(chicago, pm25tmean2 > 30)
+head(chic.f, 2)
+#   city tmpd dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 chic   23 21.9 1998-01-17      38.10   32.46154 3.180556   25.3000
+# 2 chic   28 25.8 1998-01-23      33.95   38.69231 1.750000   29.3763
+
+# filter on multiple rows
+chic.f <- filter(chicago, pm25tmean2 > 30 & tmpd > 80)
+head(chic.f, 2)
+#   city tmpd dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 chic   81 71.2 1998-08-23       39.6       59.0 45.86364  14.32639
+# 2 chic   81 70.4 1998-09-06       31.5       50.5 50.66250  20.3125
+
+    ### arrange
+
+chicago <- arrange(chicago, date)
+head(chicago, 3)
+#   city tmpd   dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 chic 31.5 31.500 1987-01-01         NA   34.00000 4.250000  19.98810
+# 2 chic 33.0 29.875 1987-01-02         NA         NA 3.304348  23.19099
+# 3 chic 33.0 27.375 1987-01-03         NA   34.16667 3.333333  23.81548
+
+tail(chicago, 3)
+#      city tmpd dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 6938 chic   35 29.4 2005-12-29    7.45000       23.5 6.794837  19.97222
+# 6939 chic   36 31.0 2005-12-30   15.05714       19.2 3.034420  22.80556
+# 6940 chic   35 30.1 2005-12-31   15.00000       23.5 2.531250  13.25000
+
+head(arrange(chicago, desc(date)), 3)
+#   city tmpd dptp       date pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+# 1 chic   35 30.1 2005-12-31   15.00000       23.5 2.531250  13.25000
+# 2 chic   36 31.0 2005-12-30   15.05714       19.2 3.034420  22.80556
+# 3 chic   35 29.4 2005-12-29    7.45000       23.5 6.794837  19.97222
+
+    ### rename
+
+chicago <- rename(chicago, pm25 = pm25tmean2, dewpoint = dptp)
+head(chicago, 2)
+#   city tmpd dewpoint       date pm25 pm10tmean2 o3tmean2 no2tmean2
+# 1 chic 31.5   31.500 1987-01-01   NA         34 4.250000  19.98810
+# 2 chic 33.0   29.875 1987-01-02   NA         NA 3.304348  23.19099
+
+    ### mutate
+
+chicago <- mutate(chicago, pm25detrend = pm25-mean(pm25, na.rm = T))
+tail(select(chicago, pm25, pm25detrend), 3)
+#          pm25 pm25detrend
+# 6938  7.45000   -8.780958
+# 6939 15.05714   -1.173815
+# 6940 15.00000   -1.230958
+
+    ### group_by
+
+chicago <- mutate(chicago, tempcat = factor(1 * (tmpd > 80), labels = c("cold", "hot")))
+hotcold <- group_by(chicago, tempcat)
+hotcold
+#     city  tmpd dewpoint       date  pm25 pm10tmean2  o3tmean2 no2tmean2 pm25detrend tempcat
+#    (chr) (dbl)    (dbl)     (date) (dbl)      (dbl)     (dbl)     (dbl)       (dbl)  (fctr)
+# 1   chic  31.5   31.500 1987-01-01    NA   34.00000  4.250000  19.98810          NA    cold
+# 2   chic  33.0   29.875 1987-01-02    NA         NA  3.304348  23.19099          NA    cold
+
+    ### summarize
+
+summarize(hotcold, pm25 = mean(pm25), o3 = max(o3tmean2), no2 = median(no2tmean2))
+#   tempcat    pm25        o3      no2
+#    (fctr)   (dbl)     (dbl)    (dbl)
+# 1    cold      NA 66.587500 24.54924
+# 2     hot      NA 62.969656 24.93870
+# 3      NA 47.7375  9.416667 37.44444
+
+summarize(hotcold, pm25 = mean(pm25, na.rm = T), o3 = max(o3tmean2), no2 = median(no2tmean2))
+#   tempcat     pm25        o3      no2
+#    (fctr)    (dbl)     (dbl)    (dbl)
+# 1    cold 15.97807 66.587500 24.54924
+# 2     hot 26.48118 62.969656 24.93870
+# 3      NA 47.73750  9.416667 37.44444
+
+# summarize by year, using POSIXlt
+chicago <- mutate(chicago, year = as.POSIXlt(date)$year + 1900)
+years <- group_by(chicago, year)
+summarize(years, pm25 = mean(pm25, na.rm = T), o3 = max(o3tmean2), no2 = median(no2tmean2))
+#     year     pm25       o3      no2
+#    (dbl)    (dbl)    (dbl)    (dbl)
+# 1   1987       NA 62.96966 23.49369
+# 2   1988       NA 61.67708 24.52296
+# 3   1989       NA 59.72727 26.14062
+# 4   1990       NA 52.22917 22.59583
+
+    ### 'pipeline' operator, %>%
+
+chicago %>% 
+    mutate(month = as.POSIXlt(date)$mon + 1) %>% 
+    group_by(month) %>%
+    summarize(pm25 = mean(pm25, na.rm = T), o3 = max(o3tmean2), no2 = median(no2tmean2))
+#    month     pm25       o3      no2
+#    (dbl)    (dbl)    (dbl)    (dbl)
+# 1      1 17.76996 28.22222 25.35417
+# 2      2 20.37513 37.37500 26.78034
+# 3      3 17.40818 39.05000 26.76984
 
         ### Merging Data
 
