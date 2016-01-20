@@ -66,7 +66,7 @@ grep("^United", gdp$countryNames, value = T)
 # Match the data based on the country shortcode. 
 
 # Of the countries for which the end of the fiscal year is available, how many end in June?
-
+library(lubridate)
 
 
 7
@@ -86,7 +86,11 @@ download data on Amazon's stock price and get the times the data was sampled.
 library(quantmod)
 amzn = getSymbols("AMZN",auto.assign=FALSE)
 sampleTimes = index(amzn)
-How many values were collected in 2012? How many values were collected on Mondays in 2012?
+
+# How many values were collected in 2012? 
+
+# How many values were collected on Mondays in 2012?
+# wday(this_day, label = TRUE)
 
 252, 50
 
