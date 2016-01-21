@@ -129,3 +129,99 @@ str_trim("Puff     ")
 # $ represents end of line
 # [] used to list a set of char to accept:
     # [Bb][Uu][Ss][Hh] captures Bush, bush, or bUSH
+
+
+        # Regular Expressions II
+
+# . used to refer to any character
+# | translates to 'or'
+# ? optional 
+# \ escape character, used to make metacharacter literal
+# * repetition, any number, including none/zero
+# + repetition, at least one item
+# {} interval quantifiers; {min, max}; {1,5}
+# \1 repetition of pattern n times
+
+
+        # Working with Dates
+
+d1 = date()
+d1
+# [1] "Thu Jan 21 16:44:49 2016"
+
+class(d1)
+# [1] "character
+
+d2 = Sys.Date()
+d2
+# [1] "2016-01-21"
+class(d2)
+# [1] "Date"
+
+format(d2, "%a %b %d")
+# [1] "Thu Jan 21"
+
+# creating dates
+x = c("1jan2001", "2jan2001", "1apr2001"); z = as.Date(x, "%d%b%Y")
+z
+# [1] "2001-01-01" "2001-01-02" "2001-04-01"
+
+z[1] - z[2]
+# Time difference of -1 days
+
+as.numeric(z[1] - z[2])
+# [1] -1
+
+# converting to Julian
+weekdays(d2); months(d2); julian(d2)
+# [1] "Thursday"
+# [1] "January"
+# [1] 16821
+
+# attr(,"origin")
+# [1] "1970-01-01"
+
+    #LUBRIDATE
+library(lubridate); ymd("20150415")
+# [1] "2015-04-15 UTC"
+
+mdy("06/17/2003"); dmy("09-4-1998")
+# [1] "2003-06-17 UTC"
+# [1] "1998-04-09 UTC"
+
+ymd_hms("2001-12-05 10:34:23")
+# [1] "2001-12-05 10:34:23 UTC"
+
+ymd_hms("2001-12-05 10:34:23", tz = "America/New_York")
+# [1] "2001-12-05 10:34:23 EST"
+
+?Sys.timezone
+
+x = dmy(c("1jan2001", "2jan2001", "1apr2001"))
+wday(x[1])
+# [1] 2
+wday(x[1], label = T)
+# [1] Mon
+# 7 Levels: Sun < Mon < Tues < Wed < Thurs < ... < Sat
+
+
+        # Data Resources
+
+# Open Government Sites
+    # UN; US (www.data.gov); UK; etc.
+# Gapminder
+# survey data: www.asdfree.com
+# Infochimps Marketplace
+# Kaggle
+# http://blog.mortardata.com/post/67652898761/6-dataset-lists-curated-by-data-scientists
+# specialized collections
+    # Stanford Large Network Data
+    # UCI Machine Learning
+    # KDD Nugets Datasets
+    # CMU Statlib
+    # Gene expression
+    # ArXiv Data
+    # Public Data Sets on Amazon Web Services (AWS)
+
+# API's
+    # twitteR; RFacebook; RGoogleMaps
