@@ -14,7 +14,7 @@ dateDownloaded
 # Download the 2006 microdata survey about housing for the state of Idaho 
 # using download.file()
 # fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
-# download.file(fielUrl, destfile = "./data/acs_idaho.csv") # method = "curl" on Mac/Linux
+# download.file(fileUrl, destfile = "./data/acs_idaho.csv") # method = "curl" on Mac/Linux
 # idaho <- read.csv("./data/acs_idaho.csv")
 idaho = read.csv("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv")
 
