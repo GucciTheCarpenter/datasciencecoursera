@@ -92,5 +92,5 @@ tidyHAR = select(meanSTD, -activity) %>%
             group_by(subject, activityname) %>% 
                 summarize_each(funs(mean))
 
-write.table(tidyHAR, "./data/tidy_HAR.txt")
+write.table(tidyHAR, "./data/tidy_HAR.txt", row.name = FALSE)
 # Good luck!
