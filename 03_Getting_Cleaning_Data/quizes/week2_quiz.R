@@ -9,7 +9,18 @@ if (!file.exists("data")) {
 # you want "https://api.github.com/users/jtleek/repos")
 
 # tutorial: https://github.com/hadley/httr/blob/master/demo/oauth2-github.r
+# using simple authentication instead
+library(httr)
+req <- GET("https://api.github.com/users/jtleek/repos", authenticate('username', 'password'))
+content(req)[[1]]$name
+for (i in c(1:length(content(req)))) { print(content(req)[[i]]$name) }
 
+for (i in c(1:length(content(req)))) { 
+    if (content(req)[[i]]$name == "datasharing") { 
+        print(content(req)[[i]]$created_at) 
+    }
+}
+[1] "2013-11-07T13:25:07Z"
 
     #Q2
 library(sqldf)
@@ -49,12 +60,3 @@ wksst <- read.fwf("./data/wksst8110.for",
                   widths = c(11,8,4,9,4,9,4,9,4))
 head(wksst)
 sum(wksst$V4)
-
-    ### notes
-library(XML)
-library(httr)
-url <- "http://biostat.jhsph.edu/~jleek/contact.html"
-html <- GET(url)
-content2 = content(html,as="text")
-parsedHtml = htmlParse(content2,asText=TRUE)
-# xpathSApply(parsedHtml, )
